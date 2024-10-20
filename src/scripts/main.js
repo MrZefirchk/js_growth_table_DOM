@@ -1,105 +1,95 @@
 'use strict';
 
 // write code here
+const MAX_ROWS = 10;
+const MAX_COLUMNS = 10;
+const MIN_ROWS = 2;
+const MIN_COLUMNS = 2;
+
 const container = document.querySelector('.container');
 const appendRowButton = container.querySelector('.append-row');
 const removeRowButton = container.querySelector('.remove-row');
 const appendColumnButton = container.querySelector('.append-column');
 const removeColumnButton = container.querySelector('.remove-column');
+const tableRows = container.querySelector('tbody');
 
-const appendRow = (tableRows) => {
+const appendRow = (rows) => {
   const newRow = document.createElement('tr');
 
   for (
     let i = 0;
-    i < tableRows.lastElementChild.querySelectorAll('td').length;
+    i < rows.firstElementChild.querySelectorAll('td').length;
     i++
   ) {
     const newCell = document.createElement('td');
 
     newRow.appendChild(newCell);
   }
-  tableRows.appendChild(newRow);
+  rows.appendChild(newRow);
 };
 
-const removeRow = (tableRows) => {
-  tableRows.lastElementChild.remove();
+const removeRow = (rows) => {
+  rows.lastElementChild.remove();
 };
 
-const appendColumn = (tableRows) => {
-  tableRows.querySelectorAll('tr').forEach((elem) => {
+const appendColumn = (rows) => {
+  rows.querySelectorAll('tr').forEach((elem) => {
     const newTableData = document.createElement('td');
 
     elem.appendChild(newTableData);
   });
 };
 
-const removeColumn = (tableRows) => {
-  tableRows.querySelectorAll('tr').forEach((elem) => {
+const removeColumn = (rows) => {
+  rows.querySelectorAll('tr').forEach((elem) => {
     elem.lastElementChild.remove();
   });
 };
 
-container.addEventListener('click', (e) => {
-  const clickedButton = e.target.closest('button');
+const updateButtonsState = () => {
+  const rowsCount = tableRows.children.length;
+  const columnsCount = tableRows.firstChild.children.length;
 
-  if (!clickedButton) {
-    return;
-  }
+  appendRowButton.disabled = rowsCount >= MAX_ROWS;
+  removeRowButton.disabled = rowsCount <= MIN_ROWS;
+  appendColumnButton.disabled = columnsCount >= MAX_COLUMNS;
+  removeColumnButton.disabled = columnsCount <= MIN_COLUMNS;
+};
 
-  const MAX_ROWS = 10;
-  const MAX_COLUMNS = 10;
-  const MIN_ROWS = 2;
-  const MIN_COLUMNS = 2;
+appendRowButton.addEventListener('click', (e) => {
+  const rowsCount = tableRows.children.length;
 
-  const tableRows = container.querySelector('tbody');
-  let rowsCount = tableRows.children.length;
-  let columnsCount = tableRows.firstChild.children.length;
-
-  if (clickedButton === appendRowButton && rowsCount < MAX_ROWS) {
+  if (rowsCount < MAX_ROWS) {
     appendRow(tableRows);
-
-    rowsCount++;
-  } else if (clickedButton === removeRowButton && rowsCount > MIN_ROWS) {
-    removeRow(tableRows);
-
-    rowsCount--;
-  } else if (
-    clickedButton === appendColumnButton &&
-    columnsCount < MAX_COLUMNS
-  ) {
-    appendColumn(tableRows);
-
-    columnsCount++;
-  } else if (
-    clickedButton === removeColumnButton &&
-    columnsCount > MIN_COLUMNS
-  ) {
-    removeColumn(tableRows);
-
-    columnsCount--;
+    updateButtonsState();
   }
-
-  const updateButtons = [
-    {
-      button: appendRowButton,
-      condition: rowsCount >= MAX_ROWS,
-    },
-    {
-      button: removeRowButton,
-      condition: rowsCount <= MIN_ROWS,
-    },
-    {
-      button: appendColumnButton,
-      condition: columnsCount >= MAX_COLUMNS,
-    },
-    {
-      button: removeColumnButton,
-      condition: columnsCount <= MIN_COLUMNS,
-    },
-  ];
-
-  updateButtons.forEach(({ button, condition }) => {
-    button.disabled = condition;
-  });
 });
+
+removeRowButton.addEventListener('click', (e) => {
+  const rowsCount = tableRows.children.length;
+
+  if (rowsCount > MIN_ROWS) {
+    removeRow(tableRows);
+    updateButtonsState();
+  }
+});
+
+appendColumnButton.addEventListener('click', (e) => {
+  const columnsCount = tableRows.firstChild.children.length;
+
+  if (columnsCount < MAX_COLUMNS) {
+    appendColumn(tableRows);
+    updateButtonsState();
+  }
+});
+
+removeColumnButton.addEventListener('click', (e) => {
+  const columnsCount = tableRows.firstChild.children.length;
+
+  if (columnsCount > MIN_COLUMNS) {
+    removeColumn(tableRows);
+    updateButtonsState();
+  }
+});
+
+updateButtonsState();
